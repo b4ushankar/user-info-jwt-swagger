@@ -50,7 +50,7 @@ public class AuthenticationController {
         final UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(signUpDto.getUsername());
 
         //generate token
-        final String jwt = jwtUtil.generateToken(userDetails.getUsername());
+        final String jwt = jwtUtil.generateToken(userDetails);
 
         logger.info("token created");
         return new AuthenticationResponse(jwt);

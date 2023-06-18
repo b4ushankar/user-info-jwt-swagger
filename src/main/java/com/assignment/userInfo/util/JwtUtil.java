@@ -1,8 +1,13 @@
 package com.assignment.userInfo.util;
 
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.io.Decoders;
@@ -11,10 +16,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
     public static final String SECRET = "5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437";
 
@@ -49,13 +58,19 @@ public class JwtUtil {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    public String generateToken(String userName){
-        Map<String,Object> claims=new HashMap<>();
-        return createToken(claims,userName);
+    public String generateToken(UserDetails userDetails){
+
+        String authorities = userDetails.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
+        Map<String,Object> claimsmap = new HashMap<>();
+        claimsmap.put("roles",authorities);
+        return createToken(claimsmap,userDetails.getUsername());
     }
 
     private String createToken(Map<String, Object> claims, String userName) {
+        logger.info("token creation started");
         return Jwts.builder()
+                .setHeaderParam("typ","JWT")
                 .setClaims(claims)
                 .setSubject(userName)
                 .setIssuedAt(new Date(System.currentTimeMillis()))

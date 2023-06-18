@@ -13,4 +13,5 @@ public class SignUp {
     @Id
     private String userName;
     private String password;
+    private String role;
 }

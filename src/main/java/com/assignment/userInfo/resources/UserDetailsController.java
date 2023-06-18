@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -30,7 +31,9 @@ public class UserDetailsController {
     @Autowired
     private UserDetailsService userDetailsService;
 
+
     @GetMapping(UrlMappings.GET_USER)
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<?> getUser(@RequestParam(value = "userId",required = false) String userId){
         logger.debug("user id is "+userId);
         if(userId==null){
@@ -45,18 +48,21 @@ public class UserDetailsController {
     }
 
     @PostMapping(UrlMappings.CREATE_USER)
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<String> createUser(@Valid @RequestBody UserDetailsDto userDetailsDto){
         userDetailsService.saveUser(userDetailsDto);
         return new ResponseEntity<String>(Messages.SUCCESS,HttpStatus.CREATED);
     }
 
     @PutMapping(UrlMappings.UPDATE_USER)
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<String> updateUser(@RequestBody UserDetailsDto userDetailsDto){
         userDetailsService.updateUser(userDetailsDto);
         return new ResponseEntity<String>(Messages.SUCCESS,HttpStatus.OK);
     }
 
     @DeleteMapping(UrlMappings.DELETE_USER)
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<String> deleteUser(@RequestParam("userId") String userId){
         userDetailsService.deleteUser(userId);
         return new ResponseEntity<String>(Messages.SUCCESS,HttpStatus.ACCEPTED);
